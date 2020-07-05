@@ -46,35 +46,35 @@ CHIP ALU {
     // zx: Zero the x input?
     Mux16 (a=x, b=false, sel=zx, out=zxres);
 
-    //zy: Zero the y input?
+    // zy: Zero the y input?
     Mux16 (a=y, b=false, sel=zy, out=zyres);
 
     // nx: Negate the x input?
     Not16 (in=zxres, out=notzxres);
     Mux16 (a=zxres, b=notzxres, sel=nx, out=nxres);
 
-    //ny: Negate the y input?
+    // ny: Negate the y input?
     Not16 (in=zyres, out=notzyres);
     Mux16 (a=zyres, b=notzyres, sel=ny, out=nyres);
 
-    //f: add (f==1) or and (f==0)
+    // f: add (f==1) or and (f==0)
     And16 (a=nxres, b=nyres, out=nxrAndnxy);
     Add16 (a=nxres, b=nyres, out=nxrAddnxy);
     Mux16 (a=nxrAndnxy, b=nxrAddnxy, sel=f, out=fres);
 
-    //no: negate output (if no==1)
+    // no: negate output (if no==1) and final output
     Not16 (in=fres, out = notfres);
     Mux16 (
         a=fres, b=notfres, sel=no, out=out,
         out[15]=out15, out[0..7]=outfirsthalf, out[8..15]=outsecondhalf
     );
 
-    // Check if output == 0:
+    // ouput zr: Check if output == 0
     Or8Way (in=outfirsthalf,  out=zr1);
     Or8Way (in=outsecondhalf, out=zr2);
     Or (a=zr1, b=zr2, out=notzr);
     Not (in=notzr, out=zr);
 
-    // Check if output < 0:
+    // output ng: Check if output < 0:
     Mux (a=false, b=true, sel=out15, out=ng);
 }
